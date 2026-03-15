@@ -1,0 +1,26 @@
+Case Study 27: Cloud Cybersecurity Monitoring Service at SecureNet
+Technologies Pvt. Ltd.
+Background :
+SecureNet Technologies Pvt. Ltd. is a cybersecurity firm in Mumbai serving 50 small
+companies. Clients use basic antivirus and firewall systems. There is no 24/7
+monitoring.
+In the last year, 8% of clients faced cyber incidents like phishing and ransomware. The
+company spends ₹90 Lakhs yearly on manual security checks and incident handling.
+SecureNet plans to invest ₹60 Lakhs in a Cloud Cybersecurity Monitoring Service. The
+system will provide real-time threat detection, automated alerts, log monitoring, and
+cloud-based dashboards. The goal is to reduce cyber attacks, lower response time, and
+improve client trust.
+Students can simulate log data, attack frequency, response time, and monitoring cost
+using Python.
+Questions for Students:
+Business and Financial Analysis :
+1. If incident handling cost reduces by 40% and security losses reduce by 50%,
+calculate annual savings.
+2.Calculate Net Benefit = Total Savings – Investment.
+Technical and Data Analysis :
+3. List key features of a cloud cybersecurity monitoring system.
+4. How can synthetic log data be generated using Python?
+Business Impact :
+5. How does real-time monitoring improve cybersecurity for small companies?
+Recommend whether the company should invest in the cloud cybersecurity
+monitoring service and justify your answer.
