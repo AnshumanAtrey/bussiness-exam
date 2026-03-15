@@ -62,7 +62,7 @@ SHADOWS = {
     "elevated": "0 4px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.06)",
 }
 
-PHOSPHOR_CDN = "https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css"
+PHOSPHOR_CDN = "https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css"
 SPACE_GROTESK_CDN = "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
 
 # SVG logo for SecureNet - minimal shield with checkmark

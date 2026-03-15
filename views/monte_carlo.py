@@ -31,7 +31,7 @@ with col_sims:
 with col_years:
     n_years = st.slider("Projection years", 1, 5, 3)
 with col_btn:
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("")
     run_btn = st.button("Run Simulation")
 
 

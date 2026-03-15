@@ -2,20 +2,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* ── Streamlit chrome cleanup ──
-   Use visibility:hidden (not display:none) to preserve layout and sidebar toggle */
+   Use visibility:hidden to preserve layout flow and sidebar toggle */
 #MainMenu { visibility: hidden !important; }
 footer { visibility: hidden !important; }
 div[data-testid="stToolbar"] { visibility: hidden !important; }
 div[data-testid="stStatusWidget"] { visibility: hidden !important; }
 
-/* Reduce the header gap at top of page */
+/* Reduce the header gap at top */
 header[data-testid="stHeader"] {
-    height: 2.2rem !important;
+    height: 2rem !important;
     min-height: 0 !important;
     background: #F7F8FA !important;
 }
 
-/* Ensure sidebar expand button is always visible */
+/* Ensure sidebar collapse/expand button is always accessible */
 button[kind="headerNoPadding"],
 div[data-testid="collapsedControl"],
 section[data-testid="stSidebar"] button[data-testid="stSidebarNavCollapseIcon"] {
@@ -24,9 +24,9 @@ section[data-testid="stSidebar"] button[data-testid="stSidebarNavCollapseIcon"] 
     opacity: 1 !important;
 }
 
-/* ── Top padding reduction ── */
+/* ── Layout ── */
 .stMainBlockContainer {
-    padding-top: 1rem !important;
+    padding-top: 0.8rem !important;
     max-width: 1200px !important;
 }
 
@@ -36,20 +36,20 @@ h1, h2, h3 {
     color: #0F1114 !important;
     letter-spacing: -0.02em;
 }
-h1 { font-weight: 700 !important; font-size: 26px !important; margin-bottom: 0 !important; }
-h2 { font-weight: 600 !important; font-size: 20px !important; }
-h3 { font-weight: 500 !important; font-size: 16px !important; }
+h1 { font-weight: 700 !important; font-size: 24px !important; margin-bottom: 0 !important; }
+h2 { font-weight: 600 !important; font-size: 18px !important; }
+h3 { font-weight: 500 !important; font-size: 15px !important; }
 
-/* Body text: lighter weight, softer color, constrained width */
+/* Body text: lighter color, constrained width */
 [data-testid="stMarkdownContainer"] p {
-    color: #374151 !important;
+    color: #4B5563 !important;
     font-weight: 400 !important;
-    font-size: 14.5px !important;
+    font-size: 14px !important;
     line-height: 1.65 !important;
-    max-width: 860px;
+    max-width: 840px;
 }
 
-/* But don't constrain text inside metric cards (injected HTML) */
+/* Don't constrain text inside injected card HTML */
 [data-testid="stMarkdownContainer"] .sn-card p {
     max-width: none;
     color: inherit !important;
@@ -58,27 +58,74 @@ h3 { font-weight: 500 !important; font-size: 16px !important; }
     line-height: inherit !important;
 }
 
-/* ── Sidebar ── */
+/* ══════════════════════════════════════════════════════════════════════
+   SIDEBAR - Modern compact navigation
+   ══════════════════════════════════════════════════════════════════════ */
 section[data-testid="stSidebar"] {
     background: #FFFFFF !important;
-    border-right: 1px solid #E2E5EA !important;
+    border-right: 1px solid #E8EAED !important;
+}
+
+/* Sidebar overall padding */
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 0.5rem !important;
 }
 
 section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    font-size: 13px;
+    font-size: 12px;
     max-width: none;
 }
 
-/* Active sidebar nav item */
+/* Nav link - compact, small text */
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] {
+    padding: 7px 12px !important;
+    margin: 1px 0 !important;
+    border-radius: 6px !important;
+    transition: background 0.12s ease !important;
+}
+
+/* Nav link text - smaller */
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] span {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: #4B5563 !important;
+    letter-spacing: 0.005em;
+}
+
+/* Nav icon - smaller and muted */
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] [data-testid="stIconMaterial"] {
+    font-size: 16px !important;
+    color: #9CA3AF !important;
+    margin-right: 2px !important;
+}
+
+/* Nav hover */
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover {
+    background: #F3F4F6 !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover span {
+    color: #1F2937 !important;
+}
+
+/* Nav active state */
 section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {
     background: #E6F4F0 !important;
-    border-radius: 6px;
-    font-weight: 600 !important;
 }
 
 section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] span {
-    color: #0D7C66 !important;
+    color: #0A6352 !important;
     font-weight: 600 !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] [data-testid="stIconMaterial"] {
+    color: #0D7C66 !important;
+}
+
+/* Separator between logo and nav */
+section[data-testid="stSidebar"] [data-testid="stLogoSpacer"] {
+    margin-bottom: 4px !important;
 }
 
 /* ── Animations ── */
@@ -124,14 +171,14 @@ div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div {
 button[data-baseweb="tab"] {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 500 !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
 }
 
 /* ── Dividers ── */
 hr {
     border: none !important;
     border-top: 1px solid #ECEEF1 !important;
-    margin: 20px 0 !important;
+    margin: 16px 0 !important;
 }
 
 /* ── Dataframes ── */
@@ -145,19 +192,21 @@ div[data-testid="stMetric"] {
     background: #FFFFFF;
     border: 1px solid #E2E5EA;
     border-radius: 8px;
-    padding: 16px 20px;
+    padding: 14px 18px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
 }
 
 div[data-testid="stMetric"] label {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 12px !important;
-    color: #5F6B7A !important;
+    font-size: 11px !important;
+    color: #6B7280 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 div[data-testid="stMetric"] [data-testid="stMetricValue"] {
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 22px !important;
+    font-size: 20px !important;
     color: #0F1114 !important;
     letter-spacing: -0.03em !important;
 }
@@ -183,9 +232,20 @@ div[data-testid="stSlider"] [role="slider"] {
     background-color: #0D7C66 !important;
 }
 
-/* ── Caption / subtitle styling ── */
+/* ── Caption ── */
 [data-testid="stCaptionContainer"] p {
-    color: #5F6B7A !important;
-    font-size: 13px !important;
+    color: #6B7280 !important;
+    font-size: 12px !important;
     max-width: none;
+}
+
+/* ── Info/Warning boxes ── */
+div[data-testid="stAlert"] {
+    border-radius: 8px !important;
+    font-size: 13px !important;
+}
+
+/* ── Toggle button ── */
+div[data-testid="stToggle"] label span {
+    font-size: 13px !important;
 }
