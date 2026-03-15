@@ -1,12 +1,34 @@
 /* Space Grotesk for headings (body font via config.toml) */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-/* ── Streamlit chrome cleanup ── */
-div[data-testid="stToolbar"],
-div[data-testid="stDecoration"],
-div[data-testid="stStatusWidget"],
-#MainMenu,
-footer { display: none !important; }
+/* ── Streamlit chrome cleanup ──
+   Use visibility:hidden (not display:none) to preserve layout and sidebar toggle */
+#MainMenu { visibility: hidden !important; }
+footer { visibility: hidden !important; }
+div[data-testid="stToolbar"] { visibility: hidden !important; }
+div[data-testid="stStatusWidget"] { visibility: hidden !important; }
+
+/* Reduce the header gap at top of page */
+header[data-testid="stHeader"] {
+    height: 2.2rem !important;
+    min-height: 0 !important;
+    background: #F7F8FA !important;
+}
+
+/* Ensure sidebar expand button is always visible */
+button[kind="headerNoPadding"],
+div[data-testid="collapsedControl"],
+section[data-testid="stSidebar"] button[data-testid="stSidebarNavCollapseIcon"] {
+    visibility: visible !important;
+    display: flex !important;
+    opacity: 1 !important;
+}
+
+/* ── Top padding reduction ── */
+.stMainBlockContainer {
+    padding-top: 1rem !important;
+    max-width: 1200px !important;
+}
 
 /* ── Global typography ── */
 h1, h2, h3 {
@@ -14,9 +36,27 @@ h1, h2, h3 {
     color: #0F1114 !important;
     letter-spacing: -0.02em;
 }
-h1 { font-weight: 700 !important; font-size: 28px !important; }
-h2 { font-weight: 600 !important; font-size: 22px !important; }
-h3 { font-weight: 500 !important; font-size: 17px !important; }
+h1 { font-weight: 700 !important; font-size: 26px !important; margin-bottom: 0 !important; }
+h2 { font-weight: 600 !important; font-size: 20px !important; }
+h3 { font-weight: 500 !important; font-size: 16px !important; }
+
+/* Body text: lighter weight, softer color, constrained width */
+[data-testid="stMarkdownContainer"] p {
+    color: #374151 !important;
+    font-weight: 400 !important;
+    font-size: 14.5px !important;
+    line-height: 1.65 !important;
+    max-width: 860px;
+}
+
+/* But don't constrain text inside metric cards (injected HTML) */
+[data-testid="stMarkdownContainer"] .sn-card p {
+    max-width: none;
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
 
 /* ── Sidebar ── */
 section[data-testid="stSidebar"] {
@@ -25,7 +65,20 @@ section[data-testid="stSidebar"] {
 }
 
 section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    font-size: 14px;
+    font-size: 13px;
+    max-width: none;
+}
+
+/* Active sidebar nav item */
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {
+    background: #E6F4F0 !important;
+    border-radius: 6px;
+    font-weight: 600 !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] span {
+    color: #0D7C66 !important;
+    font-weight: 600 !important;
 }
 
 /* ── Animations ── */
@@ -46,11 +99,26 @@ section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
 }
 .sn-pulse { animation: pulse 2s ease-in-out infinite; }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(-8px); }
-    to   { opacity: 1; transform: translateX(0); }
+/* ── Metric card equal height + hover ── */
+div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
+    display: flex !important;
+    flex-direction: column !important;
 }
-.sn-slide-in { animation: slideIn 0.3s ease forwards; }
+
+div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.sn-card {
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.sn-card:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06) !important;
+    transform: translateY(-1px);
+}
 
 /* ── Tabs ── */
 button[data-baseweb="tab"] {
@@ -62,8 +130,8 @@ button[data-baseweb="tab"] {
 /* ── Dividers ── */
 hr {
     border: none !important;
-    border-top: 1px solid #F0F0F0 !important;
-    margin: 24px 0 !important;
+    border-top: 1px solid #ECEEF1 !important;
+    margin: 20px 0 !important;
 }
 
 /* ── Dataframes ── */
@@ -72,7 +140,7 @@ hr {
     overflow: hidden;
 }
 
-/* ── Metric override (when using st.metric) ── */
+/* ── st.metric override ── */
 div[data-testid="stMetric"] {
     background: #FFFFFF;
     border: 1px solid #E2E5EA;
@@ -83,14 +151,15 @@ div[data-testid="stMetric"] {
 
 div[data-testid="stMetric"] label {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     color: #5F6B7A !important;
 }
 
 div[data-testid="stMetric"] [data-testid="stMetricValue"] {
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 26px !important;
+    font-size: 22px !important;
     color: #0F1114 !important;
+    letter-spacing: -0.03em !important;
 }
 
 /* ── Expander ── */
@@ -100,7 +169,7 @@ details[data-testid="stExpander"] {
     background: #FFFFFF;
 }
 
-/* ── Selectbox / Inputs ── */
+/* ── Inputs ── */
 div[data-baseweb="select"] > div {
     border-radius: 6px !important;
 }
@@ -112,4 +181,11 @@ input[type="text"], input[type="number"] {
 /* ── Slider ── */
 div[data-testid="stSlider"] [role="slider"] {
     background-color: #0D7C66 !important;
+}
+
+/* ── Caption / subtitle styling ── */
+[data-testid="stCaptionContainer"] p {
+    color: #5F6B7A !important;
+    font-size: 13px !important;
+    max-width: none;
 }

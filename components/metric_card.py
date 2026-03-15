@@ -32,38 +32,40 @@ def metric_card(
 
     delta_html = ""
     if delta:
-        dc = delta_color or COLORS["success"]
+        dc = delta_color or COLORS["muted"]
         delta_html = (
-            f'<p style="font-family:Plus Jakarta Sans,sans-serif;font-size:12px;'
+            f'<p style="font-family:Plus Jakarta Sans,sans-serif;font-size:11.5px;'
             f'font-weight:500;color:{dc};margin:0;line-height:1.4;">{delta}</p>'
         )
 
     html = f"""
-    <div class="{anim}" style="
+    <div class="sn-card {anim}" style="
         background:{COLORS['card_bg']};
         border:1px solid {COLORS['border']};
         border-radius:8px;
-        padding:24px;
+        padding:20px;
         box-shadow:0 1px 2px rgba(0,0,0,0.04),0 1px 3px rgba(0,0,0,0.06);
         margin-bottom:4px;
+        min-height:110px;
     ">
-        <div style="display:flex;align-items:flex-start;gap:16px;">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
             <div style="
                 display:flex;align-items:center;justify-content:center;
-                width:48px;height:48px;border-radius:8px;
+                width:44px;height:44px;border-radius:8px;
                 background:{bg};flex-shrink:0;
             ">
-                <i class="ph-duotone ph-{icon}" style="font-size:24px;color:{ic};"></i>
+                <i class="ph-duotone ph-{icon}" style="font-size:22px;color:{ic};"></i>
             </div>
             <div style="min-width:0;">
                 <p style="
-                    font-family:Plus Jakarta Sans,sans-serif;font-size:13px;
-                    font-weight:500;color:{COLORS['muted']};margin:0 0 4px 0;
+                    font-family:Plus Jakarta Sans,sans-serif;font-size:12px;
+                    font-weight:500;color:{COLORS['muted']};margin:0 0 3px 0;
+                    letter-spacing:0.01em;
                 ">{label}</p>
                 <p style="
-                    font-family:JetBrains Mono,monospace;font-size:28px;
-                    font-weight:700;color:{COLORS['heading']};margin:0 0 4px 0;
-                    line-height:1.1;
+                    font-family:JetBrains Mono,monospace;font-size:24px;
+                    font-weight:700;color:{COLORS['heading']};margin:0 0 3px 0;
+                    line-height:1.15;letter-spacing:-0.03em;
                 ">{value}</p>
                 {delta_html}
             </div>
