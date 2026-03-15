@@ -10,23 +10,12 @@ def metric_card(
     value: str,
     delta: str = None,
     delta_color: str = None,
-    icon_bg: str = None,
     icon_color: str = None,
     delay: int = 0,
+    # Legacy params kept for compatibility but ignored
+    icon_bg: str = None,
 ):
-    """Render a styled metric card.
-
-    Args:
-        icon: Phosphor icon name (e.g. "shield-check", "currency-inr")
-        label: Short label above the value
-        value: The main metric value (already formatted)
-        delta: Optional change indicator text
-        delta_color: Color for the delta text
-        icon_bg: Background color for icon badge
-        icon_color: Icon color
-        delay: Animation delay class (0-4)
-    """
-    bg = icon_bg or COLORS["brand_tint"]
+    """Render a styled metric card with a duotone icon (no background badge)."""
     ic = icon_color or COLORS["brand"]
     anim = f"sn-animate sn-d{delay}" if delay else "sn-animate"
 
@@ -38,49 +27,29 @@ def metric_card(
             f'font-weight:500;color:{dc};margin:0;line-height:1.4;">{delta}</p>'
         )
 
-    html = f"""
-    <div class="sn-card {anim}" style="
-        background:{COLORS['card_bg']};
-        border:1px solid {COLORS['border']};
-        border-radius:8px;
-        padding:20px;
-        box-shadow:0 1px 2px rgba(0,0,0,0.04),0 1px 3px rgba(0,0,0,0.06);
-        margin-bottom:4px;
-        min-height:110px;
-    ">
-        <div style="display:flex;align-items:flex-start;gap:14px;">
-            <div style="
-                display:flex;align-items:center;justify-content:center;
-                width:44px;height:44px;border-radius:8px;
-                background:{bg};flex-shrink:0;
-            ">
-                <i class="ph-duotone ph-{icon}" style="font-size:22px;color:{ic};"></i>
-            </div>
-            <div style="min-width:0;">
-                <p style="
-                    font-family:Plus Jakarta Sans,sans-serif;font-size:12px;
-                    font-weight:500;color:{COLORS['muted']};margin:0 0 3px 0;
-                    letter-spacing:0.01em;
-                ">{label}</p>
-                <p style="
-                    font-family:JetBrains Mono,monospace;font-size:24px;
-                    font-weight:700;color:{COLORS['heading']};margin:0 0 3px 0;
-                    line-height:1.15;letter-spacing:-0.03em;
-                ">{value}</p>
-                {delta_html}
-            </div>
-        </div>
-    </div>
-    """
+    html = (
+        f'<div class="sn-card {anim}" style="'
+        f'background:{COLORS["card_bg"]};border:1px solid {COLORS["border"]};'
+        f'border-radius:8px;padding:20px;'
+        f'box-shadow:0 1px 2px rgba(0,0,0,0.04),0 1px 3px rgba(0,0,0,0.06);'
+        f'margin-bottom:4px;min-height:110px;">'
+        f'<div style="display:flex;align-items:flex-start;gap:14px;">'
+        f'<i class="ph-duotone ph-{icon}" style="font-size:30px;color:{ic};'
+        f'flex-shrink:0;margin-top:2px;"></i>'
+        f'<div style="min-width:0;">'
+        f'<p style="font-family:Plus Jakarta Sans,sans-serif;font-size:12px;'
+        f'font-weight:500;color:{COLORS["muted"]};margin:0 0 3px 0;'
+        f'letter-spacing:0.01em;">{label}</p>'
+        f'<p style="font-family:JetBrains Mono,monospace;font-size:24px;'
+        f'font-weight:700;color:{COLORS["heading"]};margin:0 0 3px 0;'
+        f'line-height:1.15;letter-spacing:-0.03em;">{value}</p>'
+        f'{delta_html}</div></div></div>'
+    )
     st.markdown(html, unsafe_allow_html=True)
 
 
 def metric_row(metrics: list[dict]):
-    """Render a row of metric cards.
-
-    Args:
-        metrics: List of dicts, each containing keyword args for metric_card.
-    """
+    """Render a row of metric cards."""
     cols = st.columns(len(metrics))
     for i, (col, m) in enumerate(zip(cols, metrics)):
         with col:

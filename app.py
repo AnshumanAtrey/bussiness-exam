@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 from components.css_loader import load_css
-from config.theme import LOGO_SVG
+from config.theme import LOGO_SVG, COLORS
 from config.logging_config import log
 
 load_css()
@@ -34,8 +34,7 @@ pages = [
 pg = st.navigation(pages, position="hidden")
 
 # ── Top navigation bar ──────────────────────────────────────────────────────
-# Logo + 7 nav links in one row, no spacer column
-cols = st.columns([1] + [1] * 7)
+cols = st.columns([0.9] + [1] * 7)
 
 with cols[0]:
     st.markdown(
@@ -46,10 +45,21 @@ with cols[0]:
 labels = ["Summary", "Cost-Benefit", "Live Monitor", "Dashboard", "Risk Sim", "Market", "Recommend"]
 for i, (page, label) in enumerate(zip(pages, labels)):
     with cols[i + 1]:
-        st.page_link(page, label=label)
+        if page.title == pg.title:
+            # Active page: render as styled HTML (not st.page_link which has
+            # Streamlit's inline gray disabled style that CSS cannot override)
+            st.markdown(
+                f'<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:12.5px;'
+                f'font-weight:600;color:{COLORS["brand_hover"]};background:{COLORS["brand_tint"]};'
+                f'padding:5px 10px;border-radius:6px;white-space:nowrap;'
+                f'display:inline-block;">{label}</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.page_link(page, label=label)
 
 st.markdown(
-    '<div style="border-bottom:1px solid #E8EAED;margin:0 0 12px 0;"></div>',
+    '<div style="border-bottom:1px solid #E8EAED;margin:0 0 10px 0;"></div>',
     unsafe_allow_html=True,
 )
 
