@@ -1,110 +1,104 @@
-"""Executive Summary - landing page for the SecureNet cybersecurity dashboard."""
+"""Executive Summary - visual landing page for the SecureNet dashboard."""
 
 import streamlit as st
 
 from components.metric_card import metric_row
+from components.visual import stat_row, before_after, callout, section_tag
 from config.constants import (
-    COMPANY_NAME,
-    COMPANY_LOCATION,
-    TOTAL_CLIENTS,
-    INCIDENT_RATE,
-    ANNUAL_OPERATIONAL_COST,
-    PROPOSED_INVESTMENT,
-    ESTIMATED_ANNUAL_LOSSES,
-    RESPONSE_TIME_BEFORE,
-    RESPONSE_TIME_AFTER,
+    COMPANY_NAME, COMPANY_LOCATION, TOTAL_CLIENTS, INCIDENT_RATE,
+    ANNUAL_OPERATIONAL_COST, PROPOSED_INVESTMENT, ESTIMATED_ANNUAL_LOSSES,
+    RESPONSE_TIME_BEFORE, RESPONSE_TIME_AFTER,
 )
+from config.theme import COLORS
 from utils.calculations import (
-    calculate_annual_savings,
-    calculate_net_benefit,
-    calculate_breakeven_months,
-    calculate_cumulative_savings,
+    calculate_annual_savings, calculate_net_benefit,
+    calculate_breakeven_months, calculate_cumulative_savings,
 )
 from utils.formatters import fmt_lakhs, fmt_pct
 
 
-# ── Header ───────────────────────────────────────────────────────────────────
 st.header("Executive Summary")
-st.caption(
-    f"{COMPANY_NAME}, {COMPANY_LOCATION}. Cloud-Based Cybersecurity Monitoring System"
-)
+st.caption(f"{COMPANY_NAME}, {COMPANY_LOCATION}")
 
-# ── Situational Metrics ──────────────────────────────────────────────────────
-metric_row([
-    {"icon": "buildings", "label": "Client Companies", "value": str(TOTAL_CLIENTS),
-     "delta": "Across 10 industries"},
-    {"icon": "shield-warning", "label": "Incident Rate", "value": fmt_pct(INCIDENT_RATE * 100),
-     "delta": "Clients affected annually"},
-    {"icon": "currency-inr", "label": "Annual Operational Cost", "value": fmt_lakhs(ANNUAL_OPERATIONAL_COST),
-     "delta": "Manual handling and response"},
-    {"icon": "lock", "label": "Proposed Investment", "value": fmt_lakhs(PROPOSED_INVESTMENT),
-     "delta": "One-time system deployment"},
+# ── Hero stats row ──────────────────────────────────────────────────────────
+stat_row([
+    {"value": "50", "label": "Client companies served", "color": COLORS["brand"]},
+    {"value": "8.0", "unit": "%", "label": "Annual incident rate", "color": COLORS["danger"]},
+    {"value": "₹90", "unit": "L", "label": "Yearly operational cost", "color": COLORS["heading"]},
+    {"value": "₹60", "unit": "L", "label": "Proposed investment", "color": COLORS["brand"]},
 ])
 
-st.divider()
+st.markdown("")
 
-# ── The Situation ─────────────────────────────────────────────────────────────
-st.subheader("The Situation")
+# ── Situation (compact) ─────────────────────────────────────────────────────
+section_tag("01", "The Situation")
 
-st.markdown(
-    f"{COMPANY_NAME} is a Mumbai-based cybersecurity firm that provides managed security "
-    f"services to {TOTAL_CLIENTS} small and medium enterprises spread across healthcare, "
-    f"financial services, retail, manufacturing, and six other sectors. The company currently "
-    f"relies on manual processes for threat detection, incident handling, and compliance "
-    f"reporting, resulting in annual operational costs of {fmt_lakhs(ANNUAL_OPERATIONAL_COST)} "
-    f"and an average incident response time of roughly {RESPONSE_TIME_BEFORE['mean']} minutes."
-)
+col_text, col_compare = st.columns([3, 2])
 
-st.markdown(
-    f"Approximately {fmt_pct(INCIDENT_RATE * 100)} of its client base experiences a security "
-    f"incident each year, and estimated breach-related losses amount to "
-    f"{fmt_lakhs(ESTIMATED_ANNUAL_LOSSES)} annually. The firm's leadership has proposed a "
-    f"{fmt_lakhs(PROPOSED_INVESTMENT)} investment in a cloud-based monitoring platform that "
-    f"would automate log analysis, threat detection, vulnerability scanning, and incident "
-    f"response workflows."
-)
+with col_text:
+    st.markdown(
+        f"{COMPANY_NAME} provides managed security to {TOTAL_CLIENTS} small and medium "
+        f"enterprises across healthcare, financial services, retail, and manufacturing. "
+        f"The company currently relies on manual processes for threat detection and incident "
+        f"handling, spending {fmt_lakhs(ANNUAL_OPERATIONAL_COST)} annually with an average "
+        f"response time of {RESPONSE_TIME_BEFORE['mean']} minutes per incident."
+    )
+    callout(
+        f"With {fmt_pct(INCIDENT_RATE * 100)} of clients affected by incidents annually and "
+        f"estimated breach losses of {fmt_lakhs(ESTIMATED_ANNUAL_LOSSES)}, leadership has "
+        f"proposed a {fmt_lakhs(PROPOSED_INVESTMENT)} cloud monitoring platform to shift "
+        f"from reactive to proactive security.",
+        icon="shield-warning",
+        variant="danger",
+    )
 
-st.markdown(
-    "This dashboard evaluates whether the proposed investment is financially justified by "
-    "examining projected cost savings, the breakeven timeline, and the net benefit over a "
-    "multi-year horizon. The analysis also models how response times, incident severity, "
-    "and operational efficiency would change after deployment."
-)
+with col_compare:
+    before_after(
+        before={"value": f"{RESPONSE_TIME_BEFORE['mean']} min", "items": [
+            "Manual threat detection",
+            "No 24/7 monitoring",
+            "Reactive incident response",
+            "Basic antivirus only",
+        ]},
+        after={"value": f"{RESPONSE_TIME_AFTER['mean']} min", "items": [
+            "Real-time threat detection",
+            "Continuous log monitoring",
+            "Automated alerting",
+            "Cloud-based dashboard",
+        ]},
+    )
 
-st.divider()
+st.markdown("")
 
-# ── Financial Snapshot ────────────────────────────────────────────────────────
-st.subheader("Financial Snapshot")
+# ── Financial Snapshot ──────────────────────────────────────────────────────
+section_tag("02", "Financial Snapshot")
 
 savings = calculate_annual_savings()
 total = savings["total_savings"]
-net_y1 = calculate_net_benefit(total)
 breakeven = calculate_breakeven_months(total)
 cumulative = calculate_cumulative_savings(total, years=3)
 net_y3 = cumulative[-1]["net_benefit"]
-
 response_improvement = (
     (RESPONSE_TIME_BEFORE["mean"] - RESPONSE_TIME_AFTER["mean"])
-    / RESPONSE_TIME_BEFORE["mean"]
-    * 100
+    / RESPONSE_TIME_BEFORE["mean"] * 100
 )
 
 metric_row([
     {"icon": "chart-line-up", "label": "Annual Savings", "value": fmt_lakhs(total),
-     "delta": "Handling + loss reduction", "delta_color": "#1A7F4B"},
-    {"icon": "clock-countdown", "label": "Breakeven Period",
-     "value": f"{breakeven:.1f} months", "delta": "Time to recover investment"},
+     "delta": f"Handling {fmt_lakhs(savings['handling_savings'])} + Loss {fmt_lakhs(savings['loss_savings'])}",
+     "delta_color": COLORS["success"], "icon_bg": COLORS["success_light"], "icon_color": COLORS["success"]},
+    {"icon": "clock-countdown", "label": "Breakeven Period", "value": f"{breakeven:.1f} mo",
+     "delta": "Months to recover investment"},
     {"icon": "trend-up", "label": "3-Year Net Benefit", "value": fmt_lakhs(net_y3),
-     "delta": "Cumulative savings minus investment", "delta_color": "#1A7F4B"},
-    {"icon": "timer", "label": "Response Time Improvement",
-     "value": fmt_pct(response_improvement),
-     "delta": f"{RESPONSE_TIME_BEFORE['mean']} min to {RESPONSE_TIME_AFTER['mean']} min"},
+     "delta": "Cumulative after investment", "delta_color": COLORS["success"],
+     "icon_bg": COLORS["success_light"], "icon_color": COLORS["success"]},
+    {"icon": "timer", "label": "Response Time", "value": f"{response_improvement:.1f}%",
+     "delta": f"{RESPONSE_TIME_BEFORE['mean']}min to {RESPONSE_TIME_AFTER['mean']}min faster"},
 ])
 
-# ── Closing ───────────────────────────────────────────────────────────────────
 st.markdown("")
-st.markdown(
-    "Use the sidebar to explore the **Cost-Benefit Analysis** for interactive financial "
-    "modelling, or visit the other detail pages for deeper breakdowns of incident data, "
-    "response-time distributions, and system architecture."
+callout(
+    "Navigate through the top bar to explore interactive cost-benefit modelling, "
+    "live threat simulation, Monte Carlo risk analysis, and the final recommendation.",
+    icon="grid-four",
 )

@@ -6,38 +6,29 @@
 footer { visibility: hidden !important; }
 div[data-testid="stToolbar"] { visibility: hidden !important; }
 div[data-testid="stStatusWidget"] { visibility: hidden !important; }
-
-/* Hide sidebar entirely */
 section[data-testid="stSidebar"] { display: none !important; }
 div[data-testid="collapsedControl"] { display: none !important; }
 
 /* Reduce header gap */
 header[data-testid="stHeader"] {
-    height: 1.6rem !important;
+    height: 1.4rem !important;
     min-height: 0 !important;
     background: #F7F8FA !important;
 }
 
-/* ── Layout ── */
+/* ── Layout: fix the chopped-off content ──
+   Remove max-width constraint. Reduce Streamlit's default 5rem side padding
+   to give content more room to breathe. */
 .stMainBlockContainer {
-    padding-top: 0.4rem !important;
-    max-width: 1200px !important;
+    padding-top: 0.3rem !important;
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+    max-width: none !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
    TOP NAVIGATION BAR
-
-   Problem: stPageLink has its own padding/min-height from Streamlit.
-   Our <a> has padding:5px 10px making it ~26px tall, but the wrapper
-   is ~40px. The hover highlight on <a> is visually smaller than the
-   clickable container, creating a "floating pill" look.
-
-   Fix: collapse the stPageLink wrapper to zero padding so the <a>
-   fills it completely. The hover bg and active bg then cover the
-   full visual area.
    ══════════════════════════════════════════════════════════════════════ */
-
-/* Collapse stPageLink container to wrap <a> tightly */
 [data-testid="stPageLink"] {
     border: none !important;
     padding: 0 !important;
@@ -45,13 +36,11 @@ header[data-testid="stHeader"] {
     line-height: normal !important;
 }
 
-/* Remove any inner wrappers Streamlit adds */
 [data-testid="stPageLink"] > div {
     padding: 0 !important;
     min-height: 0 !important;
 }
 
-/* The actual link: sized by its own padding, hover fills container */
 [data-testid="stPageLink"] a {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-size: 12.5px !important;
@@ -72,7 +61,6 @@ header[data-testid="stHeader"] {
     color: #1F2937 !important;
 }
 
-/* Active page (Streamlit marks current page link as disabled) */
 [data-testid="stPageLink"][data-active="true"] a,
 [data-testid="stPageLink"] a[disabled],
 [data-testid="stPageLink"] a[aria-disabled="true"] {
@@ -83,59 +71,38 @@ header[data-testid="stHeader"] {
     opacity: 1 !important;
 }
 
-/* Hide Material icon from nav links */
 [data-testid="stPageLink"] [data-testid="stIconMaterial"] {
     display: none !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
    COLUMN ALIGNMENT
-
-   Default: flex-start (top-aligned). Content of different heights
-   starts at the same top edge. This is correct for text, charts,
-   and nav items.
-
-   Exception: rows that contain .sn-card (metric cards) use stretch
-   so all cards in the row are equal height regardless of content.
-   Uses :has() selector (supported Chrome 105+, Firefox 121+, Safari 15.4+).
    ══════════════════════════════════════════════════════════════════════ */
-
-/* All column rows: top-align by default */
 div[data-testid="stHorizontalBlock"] {
     align-items: flex-start !important;
 }
 
-/* Metric card rows only: stretch for equal height */
 div[data-testid="stHorizontalBlock"]:has(.sn-card) {
     align-items: stretch !important;
 }
 
-/* For stretch to propagate, every wrapper between stColumn and .sn-card
-   must also be a flex container that stretches its children */
 div[data-testid="stHorizontalBlock"]:has(.sn-card) > div[data-testid="stColumn"] {
     display: flex !important;
     flex-direction: column !important;
 }
 
 div[data-testid="stHorizontalBlock"]:has(.sn-card) > div[data-testid="stColumn"] > div {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    flex: 1; display: flex; flex-direction: column;
 }
 
 div[data-testid="stHorizontalBlock"]:has(.sn-card) > div[data-testid="stColumn"] > div > div {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    flex: 1; display: flex; flex-direction: column;
 }
 
 div[data-testid="stHorizontalBlock"]:has(.sn-card) [data-testid="stMarkdownContainer"] {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    flex: 1; display: flex; flex-direction: column;
 }
 
-/* The card itself fills whatever height the column gives it */
 .sn-card {
     flex: 1;
     transition: box-shadow 0.15s ease, transform 0.15s ease;
@@ -156,17 +123,18 @@ h1 { font-weight: 700 !important; font-size: 24px !important; margin-bottom: 0 !
 h2 { font-weight: 600 !important; font-size: 18px !important; }
 h3 { font-weight: 500 !important; font-size: 15px !important; }
 
-/* Body text */
+/* Body text - constrain width for readability, not the layout */
 [data-testid="stMarkdownContainer"] p {
     color: #4B5563 !important;
     font-weight: 400 !important;
     font-size: 14px !important;
     line-height: 1.65 !important;
-    max-width: 840px;
+    max-width: 800px;
 }
 
-/* Don't constrain text inside injected card HTML */
-[data-testid="stMarkdownContainer"] .sn-card p {
+/* Don't constrain text inside injected card/visual HTML */
+[data-testid="stMarkdownContainer"] .sn-card p,
+[data-testid="stMarkdownContainer"] .sn-animate p {
     max-width: none;
     color: inherit !important;
     font-size: inherit !important;
@@ -207,10 +175,7 @@ hr {
 }
 
 /* ── Dataframes ── */
-.stDataFrame {
-    border-radius: 8px;
-    overflow: hidden;
-}
+.stDataFrame { border-radius: 8px; overflow: hidden; }
 
 /* ── st.metric override ── */
 div[data-testid="stMetric"] {
@@ -259,7 +224,7 @@ div[data-testid="stSlider"] [role="slider"] {
     max-width: none;
 }
 
-/* ── Info/Warning boxes ── */
+/* ── Alert/Info boxes ── */
 div[data-testid="stAlert"] { border-radius: 8px !important; font-size: 13px !important; }
 
 /* ── Toggle ── */
