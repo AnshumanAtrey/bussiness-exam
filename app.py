@@ -11,15 +11,14 @@ st.set_page_config(
     page_title="SecureNet - Cybersecurity Monitoring",
     page_icon="\U0001f6e1",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 from components.css_loader import load_css
-from components.sidebar import render_sidebar
+from config.theme import LOGO_SVG
 from config.logging_config import log
 
 load_css()
-render_sidebar()
 log.info("Dashboard loaded")
 
 pages = [
@@ -32,5 +31,25 @@ pages = [
     st.Page("views/recommendation.py", title="Recommendation", icon=":material/task_alt:"),
 ]
 
-pg = st.navigation(pages)
+pg = st.navigation(pages, position="hidden")
+
+# ── Top navigation bar ──────────────────────────────────────────────────────
+logo_col, spacer, *nav_cols = st.columns([1.4, 0.3] + [1] * 7)
+
+with logo_col:
+    st.markdown(
+        f'<div style="padding:2px 0 0 0;">{LOGO_SVG}</div>',
+        unsafe_allow_html=True,
+    )
+
+labels = ["Summary", "Cost-Benefit", "Live Monitor", "Dashboard", "Risk Sim", "Market", "Recommend"]
+for col, page, label in zip(nav_cols, pages, labels):
+    with col:
+        st.page_link(page, label=label)
+
+st.markdown(
+    '<div style="border-bottom:1px solid #E8EAED;margin:-4px 0 12px 0;"></div>',
+    unsafe_allow_html=True,
+)
+
 pg.run()

@@ -1,33 +1,70 @@
 /* Space Grotesk for headings (body font via config.toml) */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-/* ── Streamlit chrome cleanup ──
-   Use visibility:hidden to preserve layout flow and sidebar toggle */
+/* ── Streamlit chrome cleanup ── */
 #MainMenu { visibility: hidden !important; }
 footer { visibility: hidden !important; }
 div[data-testid="stToolbar"] { visibility: hidden !important; }
 div[data-testid="stStatusWidget"] { visibility: hidden !important; }
 
-/* Reduce the header gap at top */
+/* Hide sidebar entirely - we use top nav instead */
+section[data-testid="stSidebar"] { display: none !important; }
+div[data-testid="collapsedControl"] { display: none !important; }
+
+/* Reduce the header gap */
 header[data-testid="stHeader"] {
-    height: 2rem !important;
+    height: 1.8rem !important;
     min-height: 0 !important;
     background: #F7F8FA !important;
 }
 
-/* Ensure sidebar collapse/expand button is always accessible */
-button[kind="headerNoPadding"],
-div[data-testid="collapsedControl"],
-section[data-testid="stSidebar"] button[data-testid="stSidebarNavCollapseIcon"] {
-    visibility: visible !important;
-    display: flex !important;
-    opacity: 1 !important;
-}
-
 /* ── Layout ── */
 .stMainBlockContainer {
-    padding-top: 0.8rem !important;
+    padding-top: 0.6rem !important;
     max-width: 1200px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TOP NAVIGATION BAR
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Page link buttons - styled as nav pills */
+[data-testid="stPageLink"] a {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: #4B5563 !important;
+    text-decoration: none !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    transition: background 0.12s ease, color 0.12s ease !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+}
+
+[data-testid="stPageLink"] a:hover {
+    background: #F3F4F6 !important;
+    color: #1F2937 !important;
+}
+
+/* Active page link (Streamlit disables links to current page) */
+[data-testid="stPageLink"][data-active="true"] a,
+[data-testid="stPageLink"] a[disabled],
+[data-testid="stPageLink"] a[aria-disabled="true"] {
+    background: #E6F4F0 !important;
+    color: #0A6352 !important;
+    font-weight: 600 !important;
+    pointer-events: none;
+}
+
+/* Remove default page_link icon */
+[data-testid="stPageLink"] [data-testid="stIconMaterial"] {
+    display: none !important;
+}
+
+/* Remove underline/border from page_link container */
+[data-testid="stPageLink"] {
+    border: none !important;
 }
 
 /* ── Global typography ── */
@@ -40,7 +77,7 @@ h1 { font-weight: 700 !important; font-size: 24px !important; margin-bottom: 0 !
 h2 { font-weight: 600 !important; font-size: 18px !important; }
 h3 { font-weight: 500 !important; font-size: 15px !important; }
 
-/* Body text: lighter color, constrained width */
+/* Body text */
 [data-testid="stMarkdownContainer"] p {
     color: #4B5563 !important;
     font-weight: 400 !important;
@@ -56,76 +93,6 @@ h3 { font-weight: 500 !important; font-size: 15px !important; }
     font-size: inherit !important;
     font-weight: inherit !important;
     line-height: inherit !important;
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   SIDEBAR - Modern compact navigation
-   ══════════════════════════════════════════════════════════════════════ */
-section[data-testid="stSidebar"] {
-    background: #FFFFFF !important;
-    border-right: 1px solid #E8EAED !important;
-}
-
-/* Sidebar overall padding */
-section[data-testid="stSidebar"] > div:first-child {
-    padding-top: 0.5rem !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    font-size: 12px;
-    max-width: none;
-}
-
-/* Nav link - compact, small text */
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] {
-    padding: 7px 12px !important;
-    margin: 1px 0 !important;
-    border-radius: 6px !important;
-    transition: background 0.12s ease !important;
-}
-
-/* Nav link text - smaller */
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] span {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-    color: #4B5563 !important;
-    letter-spacing: 0.005em;
-}
-
-/* Nav icon - smaller and muted */
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"] [data-testid="stIconMaterial"] {
-    font-size: 16px !important;
-    color: #9CA3AF !important;
-    margin-right: 2px !important;
-}
-
-/* Nav hover */
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover {
-    background: #F3F4F6 !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"]:hover span {
-    color: #1F2937 !important;
-}
-
-/* Nav active state */
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] {
-    background: #E6F4F0 !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] span {
-    color: #0A6352 !important;
-    font-weight: 600 !important;
-}
-
-section[data-testid="stSidebar"] [data-testid="stSidebarNavLink"][aria-current="page"] [data-testid="stIconMaterial"] {
-    color: #0D7C66 !important;
-}
-
-/* Separator between logo and nav */
-section[data-testid="stSidebar"] [data-testid="stLogoSpacer"] {
-    margin-bottom: 4px !important;
 }
 
 /* ── Animations ── */
@@ -245,7 +212,7 @@ div[data-testid="stAlert"] {
     font-size: 13px !important;
 }
 
-/* ── Toggle button ── */
+/* ── Toggle ── */
 div[data-testid="stToggle"] label span {
     font-size: 13px !important;
 }
