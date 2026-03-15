@@ -21,8 +21,8 @@ header[data-testid="stHeader"] {
    to give content more room to breathe. */
 .stMainBlockContainer {
     padding-top: 0.3rem !important;
-    padding-left: 3rem !important;
-    padding-right: 3rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
     max-width: none !important;
 }
 
@@ -61,14 +61,22 @@ header[data-testid="stHeader"] {
     color: #1F2937 !important;
 }
 
+/* Active page - broadest possible selectors for Streamlit Cloud compat */
 [data-testid="stPageLink"][data-active="true"] a,
 [data-testid="stPageLink"] a[disabled],
-[data-testid="stPageLink"] a[aria-disabled="true"] {
+[data-testid="stPageLink"] a[disabled=""],
+[data-testid="stPageLink"] a[disabled="true"],
+[data-testid="stPageLink"] a[aria-disabled],
+[data-testid="stPageLink"] a[aria-disabled="true"],
+[data-testid="stPageLink"] a:disabled,
+[data-testid="stPageLink"] [disabled],
+[data-testid="stPageLink"] [aria-disabled] {
     background: #E6F4F0 !important;
     color: #0A6352 !important;
     font-weight: 600 !important;
     pointer-events: none;
     opacity: 1 !important;
+    -webkit-text-fill-color: #0A6352 !important;
 }
 
 [data-testid="stPageLink"] [data-testid="stIconMaterial"] {

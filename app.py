@@ -35,7 +35,7 @@ pg = st.navigation(pages, position="hidden")
 
 # ── Top navigation bar ──────────────────────────────────────────────────────
 # Logo + 7 nav links in one row, no spacer column
-cols = st.columns([1.2] + [1] * 7)
+cols = st.columns([1] + [1] * 7)
 
 with cols[0]:
     st.markdown(
