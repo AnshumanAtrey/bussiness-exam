@@ -1,6 +1,20 @@
 /* Space Grotesk for headings (body font via config.toml) */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
+/* ── Subtle dot grid background with radial fade ──
+   Bottom layer: repeating 1px dots in cool gray on 24px grid.
+   Top layer: radial gradient from transparent (center) to solid bg (edges).
+   The top layer acts as a window revealing dots in the center and
+   hiding them at the edges. Barely visible, felt more than seen. */
+.stApp {
+    background-color: #F7F8FA;
+    background-image:
+        radial-gradient(ellipse 80% 60% at 50% 35%, transparent 30%, #F7F8FA 70%),
+        radial-gradient(circle, #cfd4db 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px;
+    background-attachment: fixed, fixed;
+}
+
 /* ── Streamlit chrome cleanup ── */
 #MainMenu { visibility: hidden !important; }
 footer { visibility: hidden !important; }
@@ -13,7 +27,7 @@ div[data-testid="collapsedControl"] { display: none !important; }
 header[data-testid="stHeader"] {
     height: 1.4rem !important;
     min-height: 0 !important;
-    background: #F7F8FA !important;
+    background: transparent !important;
 }
 
 /* ── Layout: fix the chopped-off content ──
