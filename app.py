@@ -34,21 +34,22 @@ pages = [
 pg = st.navigation(pages, position="hidden")
 
 # ── Top navigation bar ──────────────────────────────────────────────────────
-logo_col, spacer, *nav_cols = st.columns([1.4, 0.3] + [1] * 7)
+# Logo + 7 nav links in one row, no spacer column
+cols = st.columns([1.2] + [1] * 7)
 
-with logo_col:
+with cols[0]:
     st.markdown(
-        f'<div style="padding:2px 0 0 0;">{LOGO_SVG}</div>',
+        f'<div style="padding:0;">{LOGO_SVG}</div>',
         unsafe_allow_html=True,
     )
 
 labels = ["Summary", "Cost-Benefit", "Live Monitor", "Dashboard", "Risk Sim", "Market", "Recommend"]
-for col, page, label in zip(nav_cols, pages, labels):
-    with col:
+for i, (page, label) in enumerate(zip(pages, labels)):
+    with cols[i + 1]:
         st.page_link(page, label=label)
 
 st.markdown(
-    '<div style="border-bottom:1px solid #E8EAED;margin:-4px 0 12px 0;"></div>',
+    '<div style="border-bottom:1px solid #E8EAED;margin:0 0 12px 0;"></div>',
     unsafe_allow_html=True,
 )
 

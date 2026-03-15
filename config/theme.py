@@ -66,11 +66,11 @@ PHOSPHOR_CDN = "https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.cs
 SPACE_GROTESK_CDN = "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
 
 # SVG logo for SecureNet - minimal shield with checkmark
-LOGO_SVG = '''<svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M8 6 L20 2 L32 6 L32 18 C32 26 26 32 20 35 C14 32 8 26 8 18Z" fill="#E6F4F0" stroke="#0D7C66" stroke-width="1.5"/>
-  <polyline points="14,18 18,22 26,14" fill="none" stroke="#0D7C66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="40" y="27" font-family="Space Grotesk, sans-serif" font-size="18" fill="#0F1114" font-weight="700">Secure</text>
-  <text x="110" y="27" font-family="Space Grotesk, sans-serif" font-size="18" fill="#0D7C66" font-weight="500">Net</text>
+LOGO_SVG = '''<svg width="140" height="28" viewBox="0 0 140 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5 4 L14 1 L23 4 L23 13 C23 19 18 23 14 25 C10 23 5 19 5 13Z" fill="#E6F4F0" stroke="#0D7C66" stroke-width="1.2"/>
+  <polyline points="9.5,12.5 12.5,15.5 18.5,9.5" fill="none" stroke="#0D7C66" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="28" y="19" font-family="Space Grotesk, sans-serif" font-size="14.5" fill="#0F1114" font-weight="700">Secure</text>
+  <text x="84" y="19" font-family="Space Grotesk, sans-serif" font-size="14.5" fill="#0D7C66" font-weight="500">Net</text>
 </svg>'''
 
 LOGO_ICON_SVG = '''<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
