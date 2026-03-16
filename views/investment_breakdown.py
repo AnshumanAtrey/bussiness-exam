@@ -234,8 +234,8 @@ with tab_projection:
                 "Year": "Year 0 (current, ₹60L invested)",
                 "Clients": clients,
                 "Revenue (₹L)": f"{revenue:.1f}",
-                "If Manual (₹L)": f"{manual_cost:.1f}",
-                "With Cloud (₹L)": f"{manual_cost:.1f}",
+                "Would-Be Cost (₹L)": f"{manual_cost:.1f}",
+                "Actual Cost (₹L)": f"{manual_cost:.1f}",
                 "Saving (₹L)": f"-{investment:.0f}.0 (invested)",
                 "Cumulative (₹L)": f"-{investment:.0f}.0",
             })
@@ -254,8 +254,8 @@ with tab_projection:
                 "Year": f"Year {yr}",
                 "Clients": clients,
                 "Revenue (₹L)": f"{revenue:.1f}",
-                "If Manual (₹L)": f"{manual_cost:.1f}",
-                "With Cloud (₹L)": f"{cloud_cost:.1f}",
+                "Would-Be Cost (₹L)": f"{manual_cost:.1f}",
+                "Actual Cost (₹L)": f"{cloud_cost:.1f}",
                 "Saving (₹L)": f"{annual_saving:.1f}",
                 "Cumulative (₹L)": f"{cumulative_saving:+.1f}",
             })
@@ -306,14 +306,14 @@ with tab_projection:
 
     fig.add_trace(go.Scatter(
         x=year_labels, y=manual_costs_arr, mode="lines+markers",
-        name="Manual cost (would-be, with hiring)",
+        name="Would-be cost (if no investment)",
         line=dict(color=COLORS["danger"], width=2, dash="dot"),
         marker=dict(size=6),
     ))
 
     fig.add_trace(go.Scatter(
         x=year_labels, y=cloud_costs_arr, mode="lines+markers",
-        name="Cloud cost (actual, scales flat)",
+        name="Actual cost (with platform)",
         line=dict(color=COLORS["brand"], width=2.5),
         marker=dict(size=7),
     ))
