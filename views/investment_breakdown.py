@@ -195,68 +195,69 @@ with tab_projection:
     )
 
     # ── Growth assumptions ──
+    # Year 0 = current state (before investment). ₹60L is spent during Year 0.
+    # Year 1 = first year on cloud platform. Savings begin here.
     investment = 60.0
     avg_revenue_per_client = 3.48  # ₹29K/mo * 12 = ₹3.48L/year
 
-    # Client growth: improved service reputation + freed-up sales capacity
-    clients_by_year = [50, 55, 62, 70, 78, 85]
+    # Client growth: starts from Year 1 (better service > reputation > referrals)
+    #                Year0  Y1   Y2   Y3   Y4   Y5
+    clients_by_year = [50,  55,  62,  70,  78,  85]
 
-    # Manual model: ₹90L base for 50 clients, grows 8%/yr for inflation,
-    # PLUS need 1 new L1 analyst (₹4.68L/yr with overhead) per ~13 new clients
-    manual_base = 90.0
-    manual_cost_per_new_hire = 4.68  # L1 at ₹30K/mo + 30% overhead
+    # Manual model: what costs WOULD be if they never invested
+    manual_base = 90.0  # current annual cost for 50 clients
+    manual_cost_per_new_hire = 4.68  # 1 L1 analyst per ~13 new clients
 
-    # Cloud model: ₹59.8L base for 50 clients, grows 3%/yr for infra,
-    # PLUS ~₹0.24L per new client (hosting + onboarding amortized)
-    # Hire 1 more L1 (₹5.46L/yr) only when crossing 80 clients (Year 4-5)
-    cloud_base = 59.8
-    cloud_cost_per_new_client = 0.24  # ₹2K/mo hosting per client
-    cloud_new_hire_cost = 5.46  # L1 at ₹35K/mo + 30% overhead
-    cloud_hire_threshold = 80  # need 5th person above this
+    # Cloud model: runs from Year 1 onward
+    cloud_base = 59.8  # annual cost once platform is live
+    cloud_cost_per_new_client = 0.24  # ₹2K/mo hosting per new client
+    cloud_new_hire_cost = 5.46  # 1 junior analyst when >80 clients
+    cloud_hire_threshold = 80
 
     rows = []
-    cumulative_net = -investment
+    cumulative_saving = 0.0
 
     for yr in range(6):
         clients = clients_by_year[yr]
         new_clients = clients - 50
         revenue = clients * avg_revenue_per_client
 
-        # Manual path: base cost with inflation + extra hires for growth
+        # Manual path (hypothetical): what would happen without the investment
         manual_inflation = manual_base * (1.08 ** yr)
         manual_extra_hires = max(0, (new_clients // 13)) * manual_cost_per_new_hire
         manual_cost = manual_inflation + manual_extra_hires
 
-        # Cloud path: base cost with small inflation + marginal client cost
-        cloud_inflation = cloud_base * (1.03 ** yr)
-        cloud_marginal = new_clients * cloud_cost_per_new_client
-        cloud_extra_hire = cloud_new_hire_cost if clients > cloud_hire_threshold else 0
-        cloud_cost = cloud_inflation + cloud_marginal + cloud_extra_hire
-
-        annual_saving = manual_cost - cloud_cost
-        profit_cloud = revenue - cloud_cost
-
         if yr == 0:
-            cumulative_net = -investment
+            # Year 0: CURRENT STATE. Still running manual ops.
+            # The ₹60L investment is made this year.
             rows.append({
-                "Year": "Year 0",
+                "Year": "Year 0 (current, ₹60L invested)",
                 "Clients": clients,
                 "Revenue (₹L)": f"{revenue:.1f}",
-                "Manual Cost (₹L)": f"{manual_cost:.1f}",
-                "Cloud Cost (₹L)": f"{cloud_cost:.1f}",
-                "Saving (₹L)": "--",
-                "Net Profit (₹L)": f"{profit_cloud:.1f}",
+                "If Manual (₹L)": f"{manual_cost:.1f}",
+                "With Cloud (₹L)": f"{manual_cost:.1f}",
+                "Saving (₹L)": f"-{investment:.0f}.0 (invested)",
+                "Cumulative (₹L)": f"-{investment:.0f}.0",
             })
+            cumulative_saving = -investment
         else:
-            cumulative_net += annual_saving
+            # Year 1+: cloud platform is live
+            cloud_inflation = cloud_base * (1.03 ** (yr - 1))
+            cloud_marginal = new_clients * cloud_cost_per_new_client
+            cloud_extra_hire = cloud_new_hire_cost if clients > cloud_hire_threshold else 0
+            cloud_cost = cloud_inflation + cloud_marginal + cloud_extra_hire
+
+            annual_saving = manual_cost - cloud_cost
+            cumulative_saving += annual_saving
+
             rows.append({
                 "Year": f"Year {yr}",
                 "Clients": clients,
                 "Revenue (₹L)": f"{revenue:.1f}",
-                "Manual Cost (₹L)": f"{manual_cost:.1f}",
-                "Cloud Cost (₹L)": f"{cloud_cost:.1f}",
+                "If Manual (₹L)": f"{manual_cost:.1f}",
+                "With Cloud (₹L)": f"{cloud_cost:.1f}",
                 "Saving (₹L)": f"{annual_saving:.1f}",
-                "Net Profit (₹L)": f"{profit_cloud:.1f}",
+                "Cumulative (₹L)": f"{cumulative_saving:+.1f}",
             })
 
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
@@ -272,20 +273,27 @@ with tab_projection:
     # ── Charts ──
     st.markdown("")
 
-    # Recompute for charts
+    # Recompute clean arrays for charts
     revenues = [c * avg_revenue_per_client for c in clients_by_year]
     manual_costs_arr = []
     cloud_costs_arr = []
     for yr in range(6):
         nc = clients_by_year[yr] - 50
         m = manual_base * (1.08 ** yr) + max(0, nc // 13) * manual_cost_per_new_hire
-        c = cloud_base * (1.03 ** yr) + nc * cloud_cost_per_new_client
-        if clients_by_year[yr] > cloud_hire_threshold:
-            c += cloud_new_hire_cost
+        if yr == 0:
+            # Year 0: still on manual, cloud not live yet
+            c = m  # same as manual (platform being set up)
+        else:
+            c = cloud_base * (1.03 ** (yr - 1)) + nc * cloud_cost_per_new_client
+            if clients_by_year[yr] > cloud_hire_threshold:
+                c += cloud_new_hire_cost
         manual_costs_arr.append(m)
         cloud_costs_arr.append(c)
 
-    profits = [r - c for r, c in zip(revenues, cloud_costs_arr)]
+    # Profit = revenue minus actual cost (manual in Y0, cloud in Y1+)
+    profits = [revenues[0] - manual_costs_arr[0]] + [
+        revenues[i] - cloud_costs_arr[i] for i in range(1, 6)
+    ]
     year_labels = [f"Year {i}" for i in range(6)]
 
     fig = go.Figure()
@@ -354,9 +362,9 @@ with tab_projection:
 
     callout(
         f"Revenue grows from ₹{revenues[0]:.0f}L to ₹{revenues[5]:.0f}L (+{((revenues[5]/revenues[0]-1)*100):.0f}%) "
-        f"as clients increase from 50 to 85. Operating cost barely moves from ₹{cloud_costs_arr[0]:.1f}L to "
-        f"₹{cloud_costs_arr[5]:.1f}L (+{((cloud_costs_arr[5]/cloud_costs_arr[0]-1)*100):.0f}%). This operating leverage "
-        f"is the fundamental advantage of an automated platform over manual operations, where every "
-        f"new client requires proportional headcount growth.",
+        f"as clients increase from 50 to 85. Cloud operating cost stays at just ₹{cloud_costs_arr[5]:.0f}L "
+        f"while manual operations would have climbed to ₹{manual_costs_arr[5]:.0f}L for the same client base. "
+        f"This operating leverage is the fundamental advantage: every new client on the automated "
+        f"platform is almost pure profit.",
         icon="trend-up", variant="success",
     )
