@@ -214,99 +214,87 @@ with tab_projection:
     cloud_new_hire_cost = 5.46  # 1 junior analyst when >80 clients
     cloud_hire_threshold = 80
 
-    rows = []
-    cumulative_saving = 0.0
+    # ── Compute all projections ──
+    revenues, manual_costs_arr, cloud_costs_arr, profits_arr = [], [], [], []
 
     for yr in range(6):
         clients = clients_by_year[yr]
         new_clients = clients - 50
         revenue = clients * avg_revenue_per_client
 
-        # Manual path (hypothetical): what would happen without the investment
-        manual_inflation = manual_base * (1.08 ** yr)
-        manual_extra_hires = max(0, (new_clients // 13)) * manual_cost_per_new_hire
-        manual_cost = manual_inflation + manual_extra_hires
+        # Would-be cost: what we'd pay if we never invested
+        m = manual_base * (1.08 ** yr) + max(0, new_clients // 13) * manual_cost_per_new_hire
 
         if yr == 0:
-            # Year 0: CURRENT STATE. Still running manual ops.
-            # The ₹60L investment is made this year.
-            rows.append({
-                "Year": "Year 0 (current, ₹60L invested)",
-                "Clients": clients,
-                "Revenue (₹L)": f"{revenue:.1f}",
-                "Would-Be Cost (₹L)": f"{manual_cost:.1f}",
-                "Actual Cost (₹L)": f"{manual_cost:.1f}",
-                "Saving (₹L)": f"-{investment:.0f}.0 (invested)",
-                "Cumulative (₹L)": f"-{investment:.0f}.0",
-            })
-            cumulative_saving = -investment
+            # Year 0: still manual, investment is made this year
+            c = m  # actual cost = manual (platform being set up)
+            profit = revenue - m - investment  # 174 - 90 - 60 = 24
         else:
             # Year 1+: cloud platform is live
-            cloud_inflation = cloud_base * (1.03 ** (yr - 1))
-            cloud_marginal = new_clients * cloud_cost_per_new_client
-            cloud_extra_hire = cloud_new_hire_cost if clients > cloud_hire_threshold else 0
-            cloud_cost = cloud_inflation + cloud_marginal + cloud_extra_hire
+            c = cloud_base * (1.03 ** (yr - 1)) + new_clients * cloud_cost_per_new_client
+            if clients > cloud_hire_threshold:
+                c += cloud_new_hire_cost
+            profit = revenue - c
 
-            annual_saving = manual_cost - cloud_cost
-            cumulative_saving += annual_saving
+        revenues.append(revenue)
+        manual_costs_arr.append(m)
+        cloud_costs_arr.append(c)
+        profits_arr.append(profit)
 
-            rows.append({
-                "Year": f"Year {yr}",
-                "Clients": clients,
-                "Revenue (₹L)": f"{revenue:.1f}",
-                "Would-Be Cost (₹L)": f"{manual_cost:.1f}",
-                "Actual Cost (₹L)": f"{cloud_cost:.1f}",
-                "Saving (₹L)": f"{annual_saving:.1f}",
-                "Cumulative (₹L)": f"{cumulative_saving:+.1f}",
-            })
+    # ── Table: clean P&L with Profit column ──
+    rows = []
+    for yr in range(6):
+        year_label = "Year 0 (₹60L invested)" if yr == 0 else f"Year {yr}"
+        rows.append({
+            "Year": year_label,
+            "Clients": clients_by_year[yr],
+            "Revenue (₹L)": f"{revenues[yr]:.1f}",
+            "Would-Be Cost (₹L)": f"{manual_costs_arr[yr]:.1f}",
+            "Actual Cost (₹L)": f"{cloud_costs_arr[yr]:.1f}",
+            "Profit (₹L)": f"{profits_arr[yr]:.1f}",
+        })
 
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
+    # Investment recovery callout
+    cumulative = -investment
+    breakeven_yr = None
+    for yr in range(1, 6):
+        cumulative += manual_costs_arr[yr] - cloud_costs_arr[yr]
+        if cumulative >= 0 and breakeven_yr is None:
+            breakeven_yr = yr
+
+    callout(
+        f"Year 0 profit is ₹{profits_arr[0]:.0f}L (revenue ₹{revenues[0]:.0f}L minus "
+        f"₹{manual_costs_arr[0]:.0f}L operating cost minus ₹{investment:.0f}L investment). "
+        f"The business stays profitable even in the investment year. The ₹{investment:.0f}L "
+        f"is fully recovered through cost savings by Year {breakeven_yr}.",
+        icon="currency-inr", variant="brand",
+    )
+
     callout(
         "In the manual model, going from 50 to 85 clients requires hiring ~3 more L1 analysts "
-        "(₹14L/yr extra). In the cloud model, the same growth adds only ₹8.4L/yr in hosting "
-        "plus one junior hire at ₹5.5L when crossing 80 clients. The marginal cost of a new "
-        "client drops from ~₹1.8L/yr (manual) to ~₹0.24L/yr (cloud).",
+        "(₹14L/yr extra). With the cloud platform, the same growth adds only ₹8.4L/yr in hosting "
+        "plus one junior hire at ₹5.5L when crossing 80 clients. Marginal cost per new client: "
+        "₹0.24L/yr (cloud) vs ₹1.8L/yr (manual).",
         icon="buildings", variant="brand",
     )
 
-    # ── Charts ──
+    # ── Chart 1: Revenue vs Costs ──
     st.markdown("")
-
-    # Recompute clean arrays for charts
-    revenues = [c * avg_revenue_per_client for c in clients_by_year]
-    manual_costs_arr = []
-    cloud_costs_arr = []
-    for yr in range(6):
-        nc = clients_by_year[yr] - 50
-        m = manual_base * (1.08 ** yr) + max(0, nc // 13) * manual_cost_per_new_hire
-        if yr == 0:
-            # Year 0: still on manual, cloud not live yet
-            c = m  # same as manual (platform being set up)
-        else:
-            c = cloud_base * (1.03 ** (yr - 1)) + nc * cloud_cost_per_new_client
-            if clients_by_year[yr] > cloud_hire_threshold:
-                c += cloud_new_hire_cost
-        manual_costs_arr.append(m)
-        cloud_costs_arr.append(c)
-
-    # Profit = revenue minus actual cost (manual in Y0, cloud in Y1+)
-    profits = [revenues[0] - manual_costs_arr[0]] + [
-        revenues[i] - cloud_costs_arr[i] for i in range(1, 6)
-    ]
     year_labels = [f"Year {i}" for i in range(6)]
 
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
-        x=year_labels, y=revenues, mode="lines+markers", name="Revenue (with client growth)",
+        x=year_labels, y=revenues, mode="lines+markers", name="Revenue",
         line=dict(color=CHART_COLORS[1], width=2.5),
         marker=dict(size=7), fill="tozeroy", fillcolor="rgba(43,108,176,0.06)",
     ))
 
     fig.add_trace(go.Scatter(
         x=year_labels, y=manual_costs_arr, mode="lines+markers",
-        name="Would-be cost (if no investment)",
+        name="Would-be cost (no investment)",
         line=dict(color=COLORS["danger"], width=2, dash="dot"),
         marker=dict(size=6),
     ))
@@ -319,31 +307,31 @@ with tab_projection:
     ))
 
     apply_theme(fig,
-        title=dict(text="Revenue, Manual Cost, and Cloud Cost as Clients Grow"),
+        title=dict(text="Revenue vs Operating Costs as Clients Grow"),
         xaxis_title="", yaxis_title="₹ Lakhs", height=400,
         legend=dict(x=0.01, y=0.99, bgcolor="rgba(255,255,255,0.85)"),
     )
     show(fig)
 
-    # Client growth + profit chart
+    # ── Chart 2: Profit + Client growth ──
     fig2 = go.Figure()
 
     fig2.add_trace(go.Bar(
-        x=year_labels, y=[c for c in clients_by_year], name="Clients",
-        marker_color=COLORS["brand"], opacity=0.3, yaxis="y2",
+        x=year_labels, y=clients_by_year, name="Clients",
+        marker_color=COLORS["brand"], opacity=0.25, yaxis="y2",
     ))
 
     fig2.add_trace(go.Scatter(
-        x=year_labels, y=profits, mode="lines+markers+text", name="Net Profit",
+        x=year_labels, y=profits_arr, mode="lines+markers+text", name="Net Profit",
         line=dict(color=COLORS["success"], width=3),
         marker=dict(size=8),
-        text=[f"₹{p:.0f}L" for p in profits],
+        text=[f"₹{p:.0f}L" for p in profits_arr],
         textposition="top center",
         textfont=dict(size=11, color=COLORS["success"]),
     ))
 
     apply_theme(fig2,
-        title=dict(text="Client Growth and Net Profit Trajectory"),
+        title=dict(text="Client Growth and Net Profit"),
         xaxis_title="", height=360,
         yaxis=dict(title="Net Profit (₹L)", gridcolor=COLORS["divider"]),
         yaxis2=dict(title="Clients", overlaying="y", side="right",
@@ -352,19 +340,18 @@ with tab_projection:
     )
     show(fig2)
 
-    # Final summary stats
+    # ── Final stats ──
     stat_row([
         {"value": "50", "unit": "to 85", "label": "Client growth over 5 years", "color": COLORS["brand"]},
         {"value": f"₹{revenues[5]:.0f}", "unit": "L", "label": f"Year 5 revenue ({clients_by_year[5]} clients)", "color": COLORS["info"]},
-        {"value": f"₹{profits[5]:.0f}", "unit": "L", "label": "Year 5 net profit", "color": COLORS["success"]},
+        {"value": f"₹{profits_arr[5]:.0f}", "unit": "L", "label": "Year 5 net profit", "color": COLORS["success"]},
         {"value": f"₹{cloud_costs_arr[5]:.0f}", "unit": "L", "label": "Year 5 operating cost", "color": COLORS["heading"]},
     ])
 
     callout(
         f"Revenue grows from ₹{revenues[0]:.0f}L to ₹{revenues[5]:.0f}L (+{((revenues[5]/revenues[0]-1)*100):.0f}%) "
-        f"as clients increase from 50 to 85. Cloud operating cost stays at just ₹{cloud_costs_arr[5]:.0f}L "
-        f"while manual operations would have climbed to ₹{manual_costs_arr[5]:.0f}L for the same client base. "
-        f"This operating leverage is the fundamental advantage: every new client on the automated "
-        f"platform is almost pure profit.",
+        f"as clients increase from 50 to 85. Actual operating cost stays at ₹{cloud_costs_arr[5]:.0f}L "
+        f"while without the investment it would have climbed to ₹{manual_costs_arr[5]:.0f}L. "
+        f"Every new client on the automated platform is almost pure profit.",
         icon="trend-up", variant="success",
     )
