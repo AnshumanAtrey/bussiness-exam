@@ -24,6 +24,7 @@ log.info("Dashboard loaded")
 pages = [
     st.Page("views/executive_summary.py", title="Executive Summary", icon=":material/dashboard:"),
     st.Page("views/cost_benefit.py", title="Cost-Benefit Analysis", icon=":material/calculate:"),
+    st.Page("views/investment_breakdown.py", title="Investment Breakdown", icon=":material/account_balance:"),
     st.Page("views/live_simulator.py", title="Live Threat Monitor", icon=":material/monitor_heart:"),
     st.Page("views/threat_dashboard.py", title="Threat Dashboard", icon=":material/security:"),
     st.Page("views/monte_carlo.py", title="Risk Simulation", icon=":material/casino:"),
@@ -34,7 +35,7 @@ pages = [
 pg = st.navigation(pages, position="hidden")
 
 # ── Top navigation bar ──────────────────────────────────────────────────────
-cols = st.columns([0.9] + [1] * 7)
+cols = st.columns([0.9] + [1] * 8)
 
 with cols[0]:
     st.markdown(
@@ -42,7 +43,7 @@ with cols[0]:
         unsafe_allow_html=True,
     )
 
-labels = ["Summary", "Cost-Benefit", "Live Monitor", "Dashboard", "Risk Sim", "Market", "Recommend"]
+labels = ["Summary", "Cost-Benefit", "Investment", "Live Monitor", "Dashboard", "Risk Sim", "Market", "Recommend"]
 for i, (page, label) in enumerate(zip(pages, labels)):
     with cols[i + 1]:
         if page.title == pg.title:
