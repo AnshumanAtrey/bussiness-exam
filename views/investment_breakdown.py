@@ -182,127 +182,181 @@ with tab_after:
     ])
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 3: 5-Year Projection
+# TAB 3: 5-Year Projection (with client growth)
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_projection:
     section_tag("04", "Financial Trajectory Over 5 Years")
 
     st.markdown(
-        "Manual operating costs grow at roughly 8% per year (salary hikes, rent increases, "
-        "inflation). Cloud platform costs grow at only 3% (infrastructure scaling). This "
-        "widening gap means savings compound each year."
+        "The real power of automation is not just cost savings on existing clients. "
+        "With a cloud platform in place, adding a new client costs almost nothing: "
+        "deploy Wazuh agents, add to Zabbix, onboard in a day. No new hires needed. "
+        "In the manual model, every 12-15 new clients would require another L1 analyst."
     )
 
-    # Calculate projections
-    manual_growth = 0.08
-    cloud_growth = 0.03
+    # ── Growth assumptions ──
     investment = 60.0
+    avg_revenue_per_client = 3.48  # ₹29K/mo * 12 = ₹3.48L/year
+
+    # Client growth: improved service reputation + freed-up sales capacity
+    clients_by_year = [50, 55, 62, 70, 78, 85]
+
+    # Manual model: ₹90L base for 50 clients, grows 8%/yr for inflation,
+    # PLUS need 1 new L1 analyst (₹4.68L/yr with overhead) per ~13 new clients
     manual_base = 90.0
+    manual_cost_per_new_hire = 4.68  # L1 at ₹30K/mo + 30% overhead
+
+    # Cloud model: ₹59.8L base for 50 clients, grows 3%/yr for infra,
+    # PLUS ~₹0.24L per new client (hosting + onboarding amortized)
+    # Hire 1 more L1 (₹5.46L/yr) only when crossing 80 clients (Year 4-5)
     cloud_base = 59.8
+    cloud_cost_per_new_client = 0.24  # ₹2K/mo hosting per client
+    cloud_new_hire_cost = 5.46  # L1 at ₹35K/mo + 30% overhead
+    cloud_hire_threshold = 80  # need 5th person above this
 
     rows = []
     cumulative_net = -investment
+
     for yr in range(6):
-        manual_cost = manual_base * (1 + manual_growth) ** yr
-        cloud_cost = cloud_base * (1 + cloud_growth) ** yr
+        clients = clients_by_year[yr]
+        new_clients = clients - 50
+        revenue = clients * avg_revenue_per_client
+
+        # Manual path: base cost with inflation + extra hires for growth
+        manual_inflation = manual_base * (1.08 ** yr)
+        manual_extra_hires = max(0, (new_clients // 13)) * manual_cost_per_new_hire
+        manual_cost = manual_inflation + manual_extra_hires
+
+        # Cloud path: base cost with small inflation + marginal client cost
+        cloud_inflation = cloud_base * (1.03 ** yr)
+        cloud_marginal = new_clients * cloud_cost_per_new_client
+        cloud_extra_hire = cloud_new_hire_cost if clients > cloud_hire_threshold else 0
+        cloud_cost = cloud_inflation + cloud_marginal + cloud_extra_hire
+
         annual_saving = manual_cost - cloud_cost
+        profit_cloud = revenue - cloud_cost
+
         if yr == 0:
             cumulative_net = -investment
             rows.append({
-                "Year": f"Year 0 (Investment)",
+                "Year": "Year 0",
+                "Clients": clients,
+                "Revenue (₹L)": f"{revenue:.1f}",
                 "Manual Cost (₹L)": f"{manual_cost:.1f}",
                 "Cloud Cost (₹L)": f"{cloud_cost:.1f}",
-                "Annual Saving (₹L)": "--",
-                "Cumulative (₹L)": f"{cumulative_net:.1f}",
+                "Saving (₹L)": "--",
+                "Net Profit (₹L)": f"{profit_cloud:.1f}",
             })
         else:
             cumulative_net += annual_saving
             rows.append({
                 "Year": f"Year {yr}",
+                "Clients": clients,
+                "Revenue (₹L)": f"{revenue:.1f}",
                 "Manual Cost (₹L)": f"{manual_cost:.1f}",
                 "Cloud Cost (₹L)": f"{cloud_cost:.1f}",
-                "Annual Saving (₹L)": f"{annual_saving:.1f}",
-                "Cumulative (₹L)": f"{cumulative_net:+.1f}",
+                "Saving (₹L)": f"{annual_saving:.1f}",
+                "Net Profit (₹L)": f"{profit_cloud:.1f}",
             })
 
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
-    # Chart: dual line (manual vs cloud) + cumulative bar
-    years = list(range(6))
-    manual_costs = [manual_base * (1 + manual_growth) ** y for y in years]
-    cloud_costs = [cloud_base * (1 + cloud_growth) ** y for y in years]
-    savings = [m - c for m, c in zip(manual_costs, cloud_costs)]
+    callout(
+        "In the manual model, going from 50 to 85 clients requires hiring ~3 more L1 analysts "
+        "(₹14L/yr extra). In the cloud model, the same growth adds only ₹8.4L/yr in hosting "
+        "plus one junior hire at ₹5.5L when crossing 80 clients. The marginal cost of a new "
+        "client drops from ~₹1.8L/yr (manual) to ~₹0.24L/yr (cloud).",
+        icon="buildings", variant="brand",
+    )
 
-    cum = -investment
-    cumulative = [cum]
-    for s in savings[1:]:
-        cum += s
-        cumulative.append(cum)
+    # ── Charts ──
+    st.markdown("")
 
-    year_labels = ["Year 0", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5"]
+    # Recompute for charts
+    revenues = [c * avg_revenue_per_client for c in clients_by_year]
+    manual_costs_arr = []
+    cloud_costs_arr = []
+    for yr in range(6):
+        nc = clients_by_year[yr] - 50
+        m = manual_base * (1.08 ** yr) + max(0, nc // 13) * manual_cost_per_new_hire
+        c = cloud_base * (1.03 ** yr) + nc * cloud_cost_per_new_client
+        if clients_by_year[yr] > cloud_hire_threshold:
+            c += cloud_new_hire_cost
+        manual_costs_arr.append(m)
+        cloud_costs_arr.append(c)
+
+    profits = [r - c for r, c in zip(revenues, cloud_costs_arr)]
+    year_labels = [f"Year {i}" for i in range(6)]
 
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
-        x=year_labels, y=manual_costs, mode="lines+markers", name="Manual Ops (would-be cost)",
-        line=dict(color=COLORS["danger"], width=2.5, dash="dot"),
-        marker=dict(size=7),
+        x=year_labels, y=revenues, mode="lines+markers", name="Revenue (with client growth)",
+        line=dict(color=CHART_COLORS[1], width=2.5),
+        marker=dict(size=7), fill="tozeroy", fillcolor="rgba(43,108,176,0.06)",
     ))
 
     fig.add_trace(go.Scatter(
-        x=year_labels, y=cloud_costs, mode="lines+markers", name="Cloud Platform (actual cost)",
+        x=year_labels, y=manual_costs_arr, mode="lines+markers",
+        name="Manual cost (would-be, with hiring)",
+        line=dict(color=COLORS["danger"], width=2, dash="dot"),
+        marker=dict(size=6),
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=year_labels, y=cloud_costs_arr, mode="lines+markers",
+        name="Cloud cost (actual, scales flat)",
         line=dict(color=COLORS["brand"], width=2.5),
         marker=dict(size=7),
     ))
 
-    fig.add_trace(go.Bar(
-        x=year_labels[1:], y=cumulative[1:], name="Cumulative Net (after ₹60L investment)",
-        marker_color=[COLORS["danger"] if v < 0 else COLORS["success"] for v in cumulative[1:]],
-        opacity=0.7,
-    ))
-
-    fig.add_hline(y=0, line_dash="dash", line_color=COLORS["muted"], line_width=1)
-
     apply_theme(fig,
-        title=dict(text="5-Year Cost Comparison and Cumulative Return"),
-        xaxis_title="", yaxis_title="₹ Lakhs",
-        height=420, barmode="overlay",
+        title=dict(text="Revenue, Manual Cost, and Cloud Cost as Clients Grow"),
+        xaxis_title="", yaxis_title="₹ Lakhs", height=400,
         legend=dict(x=0.01, y=0.99, bgcolor="rgba(255,255,255,0.85)"),
     )
     show(fig)
 
-    # Key takeaways
-    callout(
-        f"By Year 5, manual operations would cost ₹{manual_costs[5]:.1f}L annually. "
-        f"The cloud platform costs just ₹{cloud_costs[5]:.1f}L. The widening gap of "
-        f"₹{savings[5]:.1f}L per year means cumulative net benefit reaches "
-        f"₹{cumulative[5]:+.1f}L, delivering a {((cumulative[5] + investment) / investment * 100):.0f}% "
-        f"total return on the original ₹60L investment.",
-        icon="trend-up", variant="success",
+    # Client growth + profit chart
+    fig2 = go.Figure()
+
+    fig2.add_trace(go.Bar(
+        x=year_labels, y=[c for c in clients_by_year], name="Clients",
+        marker_color=COLORS["brand"], opacity=0.3, yaxis="y2",
+    ))
+
+    fig2.add_trace(go.Scatter(
+        x=year_labels, y=profits, mode="lines+markers+text", name="Net Profit",
+        line=dict(color=COLORS["success"], width=3),
+        marker=dict(size=8),
+        text=[f"₹{p:.0f}L" for p in profits],
+        textposition="top center",
+        textfont=dict(size=11, color=COLORS["success"]),
+    ))
+
+    apply_theme(fig2,
+        title=dict(text="Client Growth and Net Profit Trajectory"),
+        xaxis_title="", height=360,
+        yaxis=dict(title="Net Profit (₹L)", gridcolor=COLORS["divider"]),
+        yaxis2=dict(title="Clients", overlaying="y", side="right",
+                    showgrid=False, range=[0, 120]),
+        legend=dict(x=0.01, y=0.99, bgcolor="rgba(255,255,255,0.85)"),
     )
+    show(fig2)
 
-    # Revenue context
-    st.markdown("")
-    section_tag("05", "Revenue Context")
-
-    st.markdown(
-        "SecureNet earns approximately ₹1.74 crore annually from 50 clients across "
-        "three pricing tiers (Basic at ₹17,500/mo, Standard at ₹30,000/mo, Premium at "
-        "₹50,000/mo). The ₹60L investment represents 34.5% of one year's revenue."
-    )
-
-    rev_df = pd.DataFrame([
-        {"Tier": "Basic", "Clients": 20, "Monthly Fee (₹)": "17,500", "Annual Revenue (₹L)": "42.0"},
-        {"Tier": "Standard", "Clients": 20, "Monthly Fee (₹)": "30,000", "Annual Revenue (₹L)": "72.0"},
-        {"Tier": "Premium", "Clients": 10, "Monthly Fee (₹)": "50,000", "Annual Revenue (₹L)": "60.0"},
-        {"Tier": "Total", "Clients": 50, "Monthly Fee (₹)": "29,000 avg", "Annual Revenue (₹L)": "174.0"},
+    # Final summary stats
+    stat_row([
+        {"value": "50", "unit": "to 85", "label": "Client growth over 5 years", "color": COLORS["brand"]},
+        {"value": f"₹{revenues[5]:.0f}", "unit": "L", "label": f"Year 5 revenue ({clients_by_year[5]} clients)", "color": COLORS["info"]},
+        {"value": f"₹{profits[5]:.0f}", "unit": "L", "label": "Year 5 net profit", "color": COLORS["success"]},
+        {"value": f"₹{cloud_costs_arr[5]:.0f}", "unit": "L", "label": "Year 5 operating cost", "color": COLORS["heading"]},
     ])
-    st.dataframe(rev_df, use_container_width=True, hide_index=True)
 
     callout(
-        "With reduced operating costs (₹59.8L vs ₹90L), net profit margin improves "
-        "from ~48% to ~63%. The automated platform also enables scaling to 80-100 clients "
-        "without proportionally adding staff, unlocking a growth path that manual operations "
-        "could never support.",
-        icon="chart-line-up", variant="success",
+        f"Revenue grows from ₹{revenues[0]:.0f}L to ₹{revenues[5]:.0f}L (+{((revenues[5]/revenues[0]-1)*100):.0f}%) "
+        f"as clients increase from 50 to 85. Operating cost barely moves from ₹{cloud_costs_arr[0]:.1f}L to "
+        f"₹{cloud_costs_arr[5]:.1f}L (+{((cloud_costs_arr[5]/cloud_costs_arr[0]-1)*100):.0f}%). This operating leverage "
+        f"is the fundamental advantage of an automated platform over manual operations, where every "
+        f"new client requires proportional headcount growth.",
+        icon="trend-up", variant="success",
     )
